@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/Campus2Hand/user-service/pom.xml" />
         <option value="$PROJECT_DIR$/Campus2Hand/product-service/pom.xml" />
         <option value="$PROJECT_DIR$/Campus2Hand/order-service/pom.xml" />
+        <option value="$PROJECT_DIR$/Campus2Hand/gateway-service/pom.xml" />
       </list>
     </option>
   </component>
