@@ -1,13 +1,12 @@
-server:
-  port: 8082
-
 spring:
   application:
-    name: product-service
+    name: product-service  # 服务名，必须写
+  #  profiles:             # 环境，规则就是{文件名}-{环境}.格式
+  #    active: dev
+
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
-      config:
-        server-addr: localhost:8848
-        file-extension: yml
+        server-addr: 10.125.137.99:8848  # Nacos 地址
+        enable: true
+        file-extension: yaml         # 配置文件的格式
