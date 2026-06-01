@@ -8,6 +8,16 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
+        username: nacos
+        password: nacos
       config:
+        on-profiles: dev
         server-addr: localhost:8848
         file-extension: yml
+        username: nacos
+        password: nacos
+
+      shared-configs:
+        - data-id: common-db.yaml
+          group: DEFAULT_GROUP
+          refresh: true
