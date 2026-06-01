@@ -1,0 +1,28 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-service
+  cloud:
+    openfeign:
+      # ???????????
+      circuitbreaker:
+        enabled: true
+      # Feign ???????
+      client:
+        config:
+          default:
+            loggerLevel: full
+            connectTimeout: 5000
+            readTimeout: 5000
+
+# MyBatis
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+
+# ??
+logging:
+  level:
+    cn.edu.qvtu.user: DEBUG
+    cn.edu.qvtu.user.mapper: DEBUG
