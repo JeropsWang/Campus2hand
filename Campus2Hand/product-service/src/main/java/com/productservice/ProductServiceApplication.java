@@ -9,7 +9,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-@MapperScan("com.productservice.mapper")
 public class ProductServiceApplication {
 
     public static void main(String[] args) {
