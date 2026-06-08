@@ -30,6 +30,22 @@
               - StripPrefix=1
               - AddRequestHeader=X-Request-Source,gateway # 去除第一层路径 /api --http://user-service/**  符合后端接口
 
+          # 路由3：订单服务请求转发 http://order-service/api/**
+          - id: order-service
+            uri: lb://order-service
+            predicates:
+              - Path=/api/orders/**   # 路径匹配规则
+            filters:
+              - StripPrefix=1
+
+          # 路由4 ai客服 http://ai-assistant/api/**
+          - id: ai-assistant
+            uri: lb://ai-assistant
+            predicates:
+              - Path=/api/ai/**   # 路径匹配规则
+            filters:
+              - StripPrefix=1
+
 
 #spring:
 #  cloud:
