@@ -42,7 +42,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Campus2Hand" options="-parameters" />
       <module name="gateway-service" options="-parameters" />
-      <module name="order-service" options="-parameters" />
+      <module name="order-service" options="-parameters -parameters" />
       <module name="product-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>

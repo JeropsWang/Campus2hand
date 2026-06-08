@@ -14,14 +14,40 @@ spring:
             loggerLevel: full
             connectTimeout: 5000
             readTimeout: 5000
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            data-id: ${spring.application.name}-sentinel-rules
+            group-id: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow
 
 # MyBatis Plus
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.orderservice.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# Actuator 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
 
 # 日志
 logging:
   level:
     com.orderservice: DEBUG
     com.orderservice.mapper: DEBUG
+    com.alibaba.cloud.sentinel: INFO
