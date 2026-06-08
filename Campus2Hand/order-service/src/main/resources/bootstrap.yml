@@ -8,9 +8,17 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
+        username: nacos
+        password: nacos
       config:
         server-addr: localhost:8848
         file-extension: yml
+        username: nacos
+        password: nacos
+        shared-configs:
+          - data-id: common-db.yaml
+            group: DEFAULT_GROUP
+            refresh: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/order_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
