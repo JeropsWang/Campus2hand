@@ -1,26 +1,58 @@
-spring:
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/user/**
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/api/product/**
-        - id: order-service
-          uri: lb://order-service
-          predicates:
-            - Path=/api/order/**
+server:
+  port: 8080  # 网关对外暴露的端口
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+spring:
+  application:
+    name: gateway-service  # 网关自己的服务名称
+
+  nacos:
+    discovery:
+      server-addr: 127.0.0.1:8848  # Nacos 服务器地址
+    gateway:
+      # 路由配置（数组格式）
+      routes:
+        # 路由1：商品服务请求转发 http://product-service/api/**
+        - id: product-service               # 路由唯一标识，自定义即可
+          uri: lb://product-service         # lb:// 开启负载均衡，对应 Nacos 服务名
+          predicates: # 断言：匹配请求规则
+            - Path=/api/product/**                # 路径匹配规则
+          filters: # 过滤器：请求处理
+            - StripPrefix=2               # 去除第一层路径 /api --http://product-service/**  符合后端接口
+#        # 路由2：用户服务请求转发 http://user-service/api/**
+#        - id: user-service
+#          uri: lb://user-service
+#          predicates:
+#            #            - Path=/api/students**
+#            #            - Path=/api/teachers**
+#            - Path=/api/user/**   # 路径匹配规则
+#          filters:
+#            - StripPrefix=2
+#            - AddRequestHeader=X-Request-Source,gateway # 去除第一层路径 /api --http://user-service/**  符合后端接口
+
+
+#spring:
+#  cloud:
+#    gateway:
+#      discovery:
+#        locator:
+#          enabled: true
+#          lower-case-service-id: true
+#      routes:
+#        - id: user-service
+#          uri: lb://user-service
+#          predicates:
+#            - Path=/api/user/**
+#        - id: product-service
+#          uri: lb://product-service
+#          predicates:
+#            - Path=/api/product/**
+#        - id: order-service
+#          uri: lb://order-service
+#          predicates:
+#            - Path=/api/order/**
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
