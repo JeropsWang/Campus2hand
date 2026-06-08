@@ -1,0 +1,64 @@
+### 订单服务 API 测试示例
+
+### 1. 创建订单 - 面交
+POST http://localhost:8083/orders?userId=1001
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "productName": "二手自行车",
+  "productImage": "http://example.com/bike.jpg",
+  "price": 299.00,
+  "quantity": 1,
+  "tradeType": "FACE_TO_FACE",
+  "tradeLocation": "学校东门",
+  "remark": "希望周末交易"
+}
+
+### 2. 创建订单 - 自提
+POST http://localhost:8083/orders?userId=1001
+Content-Type: application/json
+
+{
+  "productId": 2,
+  "productName": "Java编程思想",
+  "productImage": "http://example.com/book.jpg",
+  "price": 59.90,
+  "quantity": 1,
+  "tradeType": "SELF_PICKUP",
+  "tradeLocation": "图书馆门口",
+  "remark": ""
+}
+
+### 3. 查询订单详情
+GET http://localhost:8083/orders/1
+
+### 4. 取消订单
+POST http://localhost:8083/orders/cancel?userId=1001
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "cancelReason": "不想买了"
+}
+
+### 5. 更新订单状态 - 待交付
+PUT http://localhost:8083/orders/status?orderId=2&status=PENDING_DELIVERY&tradeLocation=图书馆门口
+
+### 6. 更新订单状态 - 已完成
+PUT http://localhost:8083/orders/status?orderId=2&status=COMPLETED
+
+### 7. 查询我的订单 - 全部
+GET http://localhost:8083/orders/my?userId=1001&pageNum=1&pageSize=10
+
+### 8. 查询我的订单 - 待支付
+GET http://localhost:8083/orders/my?userId=1001&status=PENDING_PAYMENT&pageNum=1&pageSize=10
+
+### 9. 查询我的订单 - 已完成
+GET http://localhost:8083/orders/my?userId=1001&status=COMPLETED&pageNum=1&pageSize=10
+
+### 10. 订单列表查询 - 关键词搜索
+GET http://localhost:8083/orders/list?keyword=自行车&pageNum=1&pageSize=10
+
+### 11. 订单列表查询 - 按用户和状态
+GET http://localhost:8083/orders/list?userId=1001&status=PENDING_PAYMENT&pageNum=1&pageSize=10
