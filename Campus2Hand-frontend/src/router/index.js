@@ -7,6 +7,8 @@ const Home = () => import('@/views/Home.vue')
 const Test = () => import('@/views/Test.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 const Profile = () => import('@/views/Profile.vue')
+const Orders = () => import('@/views/Orders.vue')
+const AiChat = () => import('@/views/AiChat.vue')
 
 const routes = [
   {
@@ -43,6 +45,24 @@ const routes = [
     meta: {
       title: '个人中心',
       requiresAuth: true
+    }
+  },
+  {
+    path: '/orders',
+    name: 'Orders',
+    component: Orders,
+    meta: {
+      title: '我的订单',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/ai-chat',
+    name: 'AiChat',
+    component: AiChat,
+    meta: {
+      title: 'AI客服',
+      requiresAuth: false
     }
   },
   {

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("products")
+@RequestMapping("/products")
 public class ProductController {
 
     private final IProductService productService;

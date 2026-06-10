@@ -17,13 +17,32 @@ export const useUserStore = defineStore('user', () => {
 
     loading.value = true
     try {
-      const response = await userApi.getUserInfo()
+      // 获取当前用户ID（优先从已存储的用户信息中获取）
+      let userId = '1';
+      if (userInfo.value) {
+        userId = userInfo.value.id || userInfo.value.userId || userInfo.value.studentId || '1';
+      } else {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          userId = user.id || user.userId || user.studentId || '1';
+        }
+      }
+      
+      console.log('[UserStore] fetchUserInfo, userId:', userId);
+      const response = await userApi.getUserInfo(userId)
       if (response.data.code === 200) {
         userInfo.value = response.data.data
+        // 确保userId字段存在
+        if (!userInfo.value.userId && userInfo.value.id) {
+          userInfo.value.userId = userInfo.value.id;
+        }
+        localStorage.setItem('user', JSON.stringify(userInfo.value));
         return userInfo.value
       }
     } catch (error) {
-      console.error('获取用户信息失败:', error)
+      console.error('获取用户信息失败:', error);
+      console.error('错误详情:', error.response?.data);
       // 如果获取失败，清除登录状态
       logout()
     } finally {
@@ -40,16 +59,22 @@ export const useUserStore = defineStore('user', () => {
       console.log('[UserStore] 登录响应:', response)
       
       if (response.data.code === 200) {
-        // 根据后端标准，登录返回: { token, userId, nickname }
+        // 根据后端标准，登录返回: { token, id, userId, nickname, avatar, name, studentId }
         const loginData = response.data.data
         const newToken = loginData.token
         
-        // 构建用户信息对象
+        // 构建完整的用户信息对象，包含后端返回的所有字段
         const userData = {
-          userId: loginData.userId,
-          studentId: loginData.userId, // 后端标准中userId就是学号
+          id: loginData.id || loginData.userId, // 后端可能返回id或userId
+          userId: loginData.userId || loginData.id,
+          studentId: loginData.studentId || loginData.userId || loginData.id, // 学号
           nickname: loginData.nickname || '',
-          name: loginData.nickname || ''
+          name: loginData.name || '',
+          avatar: loginData.avatar || '',
+          phone: loginData.phone || '',
+          college: loginData.college || '',
+          // 保留后端返回的其他字段
+          ...loginData
         }
         
         userInfo.value = userData

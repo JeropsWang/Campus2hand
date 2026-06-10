@@ -1,9 +1,21 @@
+server:
+  port: 8081
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/user_db
     username: root
     password: 724636604
     driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+
+# 头像上传配置
+avatar:
+  upload:
+    path: ./uploads/avatars
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

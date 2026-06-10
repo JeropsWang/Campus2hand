@@ -44,10 +44,10 @@ public class UserServiceImpl implements UserService {
         LoginResponseVO responseVO = new LoginResponseVO();
         responseVO.setUserId(user.getId());
         responseVO.setNickname(user.getNickname());
-        responseVO.setAvatar(user.getAvatar());
+        // 确保返回相对路径格式
+        responseVO.setAvatar(normalizeAvatarUrl(user.getAvatar()));
         responseVO.setName(user.getName());
         responseVO.setStudentId(user.getStudentId());
-
 
         return responseVO;
     }
@@ -60,11 +60,50 @@ public class UserServiceImpl implements UserService {
          }
          responseVO.setId(user.getId());
          responseVO.setNickname(user.getNickname());
-         responseVO.setAvatar(user.getAvatar());
+         // 确保返回相对路径格式
+         responseVO.setAvatar(normalizeAvatarUrl(user.getAvatar()));
          responseVO.setName(user.getName());
          responseVO.setStudentId(user.getStudentId());
+         responseVO.setPhone(user.getPhone());
+         responseVO.setCollege(user.getCollege());
 
          return responseVO;
+    }
+
+    /**
+     * 规范化头像URL，确保返回相对路径格式
+     * @param avatarUrl 原始头像URL
+     * @return 规范化后的相对路径
+     */
+    private String normalizeAvatarUrl(String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            return null;
+        }
+
+        // 如果是绝对URL，提取相对路径部分
+        if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
+            try {
+                // 提取 /avatars/xxx 部分
+                if (avatarUrl.contains("/avatars/")) {
+                    return avatarUrl.substring(avatarUrl.indexOf("/avatars/"));
+                }
+            } catch (Exception e) {
+                // 解析失败，返回原值
+                return avatarUrl;
+            }
+        }
+
+        // 如果已经是相对路径，直接返回
+        if (avatarUrl.startsWith("/avatars/")) {
+            return avatarUrl;
+        }
+
+        // 如果是纯文件名，添加路径前缀
+        if (!avatarUrl.startsWith("/")) {
+            return "/avatars/" + avatarUrl;
+        }
+
+        return avatarUrl;
     }
 
 
@@ -108,8 +147,8 @@ public class UserServiceImpl implements UserService {
             ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
             : ".png";
 
-        // 生成唯一文件名
-        String newFilename = UUID.randomUUID().toString() + extension;
+        // 使用用户ID命名头像文件（格式：用户ID.扩展名）
+        String newFilename = userId + extension;
 
         try {
             // 创建上传目录
@@ -118,14 +157,17 @@ public class UserServiceImpl implements UserService {
                 Files.createDirectories(uploadDir);
             }
 
-            // 保存文件
+            // 删除旧头像文件（如果存在）
+            deleteOldAvatar(user.getAvatar(), uploadDir);
+
+            // 保存新文件
             Path filePath = uploadDir.resolve(newFilename);
             Files.copy(file.getInputStream(), filePath);
 
-            // 构建访问URL
-            String avatarUrl = "http://localhost:" + serverPort + "/avatars/" + newFilename;
+            // 构建访问URL（使用相对路径，前端通过代理访问）
+            String avatarUrl = "/avatars/" + newFilename;
 
-            // 更新用户头像
+            // 更新用户头像（存储相对路径）
             user.setAvatar(avatarUrl);
             userMapper.updateById(user);
 
@@ -138,6 +180,39 @@ public class UserServiceImpl implements UserService {
 
         } catch (IOException e) {
             throw new RuntimeException("上传失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除旧头像文件
+     * @param oldAvatarUrl 旧头像URL（可能是完整URL或相对路径）
+     * @param uploadDir 上传目录路径
+     */
+    private void deleteOldAvatar(String oldAvatarUrl, Path uploadDir) {
+        if (oldAvatarUrl == null || oldAvatarUrl.isEmpty()) {
+            return;
+        }
+
+        try {
+            // 提取文件名（支持完整URL和相对路径）
+            String filename;
+            if (oldAvatarUrl.contains("/")) {
+                filename = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
+            } else {
+                filename = oldAvatarUrl;
+            }
+
+            // 构建旧文件路径
+            Path oldFilePath = uploadDir.resolve(filename);
+            
+            // 如果文件存在，删除它
+            if (Files.exists(oldFilePath)) {
+                Files.delete(oldFilePath);
+                System.out.println("Deleted old avatar: " + filename);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to delete old avatar: " + e.getMessage());
+            // 删除失败不影响新头像上传
         }
     }
 

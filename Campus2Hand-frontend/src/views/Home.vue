@@ -1,8 +1,5 @@
 <template>
   <div class="home-page">
-    <!-- 离线提示 -->
-    <div v-if="isOffline" class="offline-badge">使用离线数据</div>
-
     <!-- 顶部功能模块 -->
     <header class="header">
       <div class="header-content">
@@ -44,14 +41,14 @@
         <div v-else-if="productsData && productsData.length > 0" class="products-grid">
           <div 
             v-for="product in productsData" 
-            :key="product.productId" 
-            @click="handleProductClick(product.productId)"
+            :key="product.id" 
+            @click="handleProductClick(product.id)"
             class="product-card"
           >
             <div class="product-image">图</div>
             <div class="product-title">{{ product.title }}</div>
             <div class="product-price">¥{{ product.price.toFixed(2) }}</div>
-            <div class="product-condition">{{ product.condition }}</div>
+            <div class="product-condition">{{ product.quality }}</div>
           </div>
         </div>
 
@@ -89,7 +86,19 @@
             <div class="loading-spinner"></div>
           </div>
           <div v-else-if="userData" class="user-modal-content">
-            <div class="user-avatar">{{ userData.nickname?.charAt(0) || userData.name?.charAt(0) || '用' }}</div>
+            <!-- 支持图片头像展示 -->
+            <div class="user-avatar-wrapper">
+              <img 
+                v-if="userData.avatar" 
+                :src="userData.avatar" 
+                class="user-avatar-img" 
+                alt="头像"
+                @error="handleAvatarError"
+              />
+              <div v-else class="user-avatar-text">
+                {{ userData.nickname?.charAt(0) || userData.name?.charAt(0) || '用' }}
+              </div>
+            </div>
             <div class="user-name">{{ userData.nickname || userData.name }}</div>
             <div class="user-id">学号: {{ userData.studentId }}</div>
             <div class="user-college">学院: {{ userData.college }}</div>
@@ -135,67 +144,7 @@ import { userApi, productApi, orderApi } from '@/services/api';
 
 const router = useRouter();
 
-// ==================== 全局配置 ====================
-const USE_MOCK = false; // 是否使用Mock数据，false表示调用真实API
-const API_BASE = '/api';
-
-// ==================== Mock数据定义（符合后端标准）====================
-const mockData = {
-  userInfo: {
-    code: 200,
-    message: 'success',
-    data: {
-      userId: '20240001',
-      studentId: '20240001',
-      name: '张三',
-      nickname: '小张',
-      phone: '13800138000',
-      college: '计算机学院',
-      verified: true,
-      avatar: '',
-      contact: 'zhang_san@wechat'
-    }
-  },
-  products: {
-    code: 200,
-    message: 'success',
-    data: {
-      total: 10,
-      list: [
-        { productId: 'P001', category: '数码', title: '苹果笔记本电脑', description: 'MacBook Pro 14寸', price: 3500, condition: '几乎全新', imageUrls: [], publishTime: '2024-01-15T10:30:00', status: 'ON_SALE' },
-        { productId: 'P002', category: '数码', title: '机械键盘', description: 'RGB背光', price: 180, condition: '轻微使用', imageUrls: [], publishTime: '2024-01-14T15:20:00', status: 'ON_SALE' },
-        { productId: 'P003', category: '书籍', title: '考研数学真题', description: '2024版', price: 35, condition: '九成新', imageUrls: [], publishTime: '2024-01-13T09:10:00', status: 'ON_SALE' },
-        { productId: 'P004', category: '数码', title: '蓝牙耳机', description: 'AirPods Pro', price: 89, condition: '全新未拆', imageUrls: [], publishTime: '2024-01-12T14:45:00', status: 'ON_SALE' },
-        { productId: 'P005', category: '生活用品', title: '滑板', description: '双翘板', price: 150, condition: '正常使用', imageUrls: [], publishTime: '2024-01-11T11:30:00', status: 'ON_SALE' },
-        { productId: 'P006', category: '生活用品', title: '台灯', description: '护眼灯', price: 45, condition: '八成新', imageUrls: [], publishTime: '2024-01-10T16:20:00', status: 'ON_SALE' },
-        { productId: 'P007', category: '体育用品', title: '羽毛球拍', description: '尤尼克斯', price: 99, condition: '轻微磨损', imageUrls: [], publishTime: '2024-01-09T13:15:00', status: 'ON_SALE' },
-        { productId: 'P008', category: '书籍', title: '四级真题试卷', description: '2023版', price: 25, condition: '全新', imageUrls: [], publishTime: '2024-01-08T10:00:00', status: 'ON_SALE' },
-        { productId: 'P009', category: '数码', title: '显示器', description: '27寸2K', price: 680, condition: '九成新', imageUrls: [], publishTime: '2024-01-07T09:30:00', status: 'ON_SALE' },
-        { productId: 'P010', category: '数码', title: '鼠标', description: '无线蓝牙', price: 55, condition: '正常使用', imageUrls: [], publishTime: '2024-01-06T17:45:00', status: 'ON_SALE' }
-      ]
-    }
-  },
-  orders: {
-    code: 200,
-    message: 'success',
-    data: {
-      total: 8,
-      list: [
-        { orderNo: 'ORD202406090001', userId: 1, productId: 1, productName: '苹果笔记本电脑', price: 3500.00, quantity: 1, totalAmount: 3500.00, status: 'PENDING_PAYMENT', tradeType: 'FACE_TO_FACE', tradeLocation: '图书馆门口', tradeTime: null, createTime: '2024-06-09 10:00:00' },
-        { orderNo: 'ORD202406090002', userId: 1, productId: 2, productName: '机械键盘', price: 180.00, quantity: 1, totalAmount: 180.00, status: 'PENDING_DELIVERY', tradeType: 'SELF_PICKUP', tradeLocation: '学生宿舍A栋', tradeTime: '2024-06-10 14:00:00', createTime: '2024-06-08 15:30:00' },
-        { orderNo: 'ORD202406090003', userId: 1, productId: 3, productName: '考研数学真题', price: 35.00, quantity: 1, totalAmount: 35.00, status: 'COMPLETED', tradeType: 'FACE_TO_FACE', tradeLocation: '食堂门口', tradeTime: '2024-06-05 12:00:00', createTime: '2024-06-01 09:00:00' },
-        { orderNo: 'ORD202406090004', userId: 1, productId: 4, productName: '蓝牙耳机', price: 89.00, quantity: 1, totalAmount: 89.00, status: 'COMPLETED', tradeType: 'SELF_PICKUP', tradeLocation: '教学楼B栋', tradeTime: '2024-06-03 18:00:00', createTime: '2024-06-02 20:15:00' },
-        { orderNo: 'ORD202406090005', userId: 1, productId: 5, productName: '滑板', price: 150.00, quantity: 1, totalAmount: 150.00, status: 'CLOSED', tradeType: 'FACE_TO_FACE', tradeLocation: '操场旁边', tradeTime: null, createTime: '2024-06-06 11:00:00' },
-        { orderNo: 'ORD202406090006', userId: 1, productId: 6, productName: '台灯', price: 45.00, quantity: 1, totalAmount: 45.00, status: 'PENDING_PAYMENT', tradeType: 'SELF_PICKUP', tradeLocation: '图书馆', tradeTime: null, createTime: '2024-06-09 08:30:00' },
-        { orderNo: 'ORD202406090007', userId: 1, productId: 7, productName: '羽毛球拍', price: 99.00, quantity: 2, totalAmount: 198.00, status: 'PENDING_DELIVERY', tradeType: 'FACE_TO_FACE', tradeLocation: '体育馆', tradeTime: '2024-06-11 10:00:00', createTime: '2024-06-08 14:45:00' },
-        { orderNo: 'ORD202406090008', userId: 1, productId: 8, productName: '四级真题试卷', price: 25.00, quantity: 1, totalAmount: 25.00, status: 'COMPLETED', tradeType: 'SELF_PICKUP', tradeLocation: '宿舍楼下', tradeTime: '2024-05-28 17:00:00', createTime: '2024-05-25 10:20:00' }
-      ]
-    }
-  }
-};
-
 // ==================== 页面状态 ====================
-const isOffline = ref(false);
 const searchKeyword = ref('');
 const showUserModal = ref(false);
 const ordersData = ref([]); // 订单数据
@@ -213,112 +162,120 @@ function getCurrentUserId() {
   const userStr = localStorage.getItem('user');
   if (userStr) {
     try {
-      return JSON.parse(userStr).userId || '20240001';
+      const user = JSON.parse(userStr);
+      // 后端使用用户ID查询
+      return user.id || user.userId || '1';
     } catch {
-      return '20240001';
+      return '1';
     }
   }
-  return '20240001'; // 默认用户ID
-}
-
-// ==================== 断网降级请求处理 ====================
-async function requestWithFallback(apiCall, mockKey) {
-  // 如果使用Mock数据，直接返回
-  if (USE_MOCK) {
-    console.log(`[Mock] Using mock data for ${mockKey}`);
-    return mockData[mockKey];
-  }
-
-  // 尝试真实接口
-  try {
-    const response = await apiCall();
-    return response;
-  } catch (error) {
-    console.warn(`[Fallback] API request failed, using mock data for ${mockKey}`);
-    isOffline.value = true;
-    setTimeout(() => isOffline.value = false, 3000);
-    return mockData[mockKey];
-  }
+  return '1'; // 默认用户ID
 }
 
 // ==================== 页面方法 ====================
 async function loadUserInfo() {
+  console.log('=====================================');
+  console.log('[Home] 开始获取用户信息');
   userLoading.value = true;
   try {
-    // 从localStorage获取用户信息
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      try {
-        const storedUser = JSON.parse(userStr);
-        if (storedUser && storedUser.userId) {
-          userData.value = storedUser;
-          console.log('[Home] 从localStorage获取用户信息:', storedUser);
-          return;
-        }
-      } catch (e) {
-        console.error('[Home] 解析localStorage用户信息失败:', e);
-      }
-    }
-
-    // 如果localStorage没有，尝试从API获取
+    // 从后端API获取真实用户信息
     const userId = getCurrentUserId();
-    console.log('[Home] 尝试从API获取用户信息, userId:', userId);
+    console.log('[Home] 请求参数 - userId:', userId);
+    console.log('[Home] 请求URL:', `/api/user/${userId}`);
+    console.log('-------------------------------------');
     
-    const response = await requestWithFallback(
-      () => userApi.getUserInfo(userId),
-      'userInfo'
-    );
+    const response = await userApi.getUserInfo(userId);
     
-    console.log('[Home] API响应:', response);
+    console.log('[Home] 响应状态:', response.status);
+    console.log('[Home] 响应数据:', JSON.stringify(response.data, null, 2));
+    console.log('-------------------------------------');
     
-    if (response.code === 200 && response.data) {
-      userData.value = response.data;
+    if (response.data.code === 200 && response.data.data) {
+      userData.value = response.data.data;
+      // 确保userId字段存在
+      if (!userData.value.userId && userData.value.id) {
+        userData.value.userId = userData.value.id;
+      }
       // 更新localStorage
-      localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem('user', JSON.stringify(userData.value));
+      console.log('[Home] ✅ 成功获取用户信息');
+      console.log('[Home] 用户数据:', JSON.stringify(userData.value, null, 2));
+    } else {
+      console.warn('[Home] ⚠️ 后端返回非成功状态');
+      console.warn('[Home] code:', response.data?.code);
+      console.warn('[Home] message:', response.data?.message);
     }
   } catch (error) {
-    console.error('[Home] Load user info failed:', error);
+    console.error('[Home] ❌ 获取用户信息失败');
+    console.error('[Home] 错误对象:', error);
+    console.error('[Home] 错误消息:', error.message);
+    if (error.response) {
+      console.error('[Home] 响应状态码:', error.response.status);
+      console.error('[Home] 响应数据:', JSON.stringify(error.response.data, null, 2));
+    }
+    // 不使用mock数据，保持用户数据为空
   } finally {
     userLoading.value = false;
+    console.log('=====================================');
   }
+}
+
+// 头像加载失败处理
+function handleAvatarError(event) {
+  console.warn('[Home] 头像加载失败，使用文字头像替代');
+  event.target.style.display = 'none';
+  event.target.parentElement.querySelector('.user-avatar-text')?.classList.remove('hidden');
 }
 
 async function loadProducts() {
   productsLoading.value = true;
   try {
-    const response = await requestWithFallback(
-      () => productApi.getProductList({ page: 1, size: 10 }),
-      'products'
-    );
+    // 传递完整参数：category、title、pageNum、pageSize
+    const params = {
+      category: '',
+      title: '',
+      pageNum: 1,
+      pageSize: 10
+    };
+    const response = await productApi.getProductList(params);
     
-    if (response.code === 200 && response.data) {
-      // 根据后端标准，数据结构是 { total, list }
-      productsData.value = response.data.list || response.data;
+    // Spring Data IPage 返回结构：{ content, totalElements, totalPages, number, size }
+    if (response.data) {
+      // IPage 的数据列表字段是 content，不是 list
+      productsData.value = response.data.content || [];
     }
   } catch (error) {
     console.error('Load products failed:', error);
+    console.error('错误详情:', error.response?.data);
+    productsData.value = [];
   } finally {
     productsLoading.value = false;
   }
 }
 
-function searchProducts() {
-  if (!searchKeyword.value.trim()) {
-    loadProducts();
-    return;
-  }
-  
+async function searchProducts() {
   productsLoading.value = true;
-  
-  setTimeout(() => {
-    const keyword = searchKeyword.value.toLowerCase();
-    const filtered = mockData.products.data.list.filter(product => 
-      product.title.toLowerCase().includes(keyword) ||
-      product.category.toLowerCase().includes(keyword)
-    );
-    productsData.value = filtered;
+  try {
+    // 传递完整参数：category、title、pageNum、pageSize
+    const params = {
+      category: '',
+      title: searchKeyword.value.trim() || '',
+      pageNum: 1,
+      pageSize: 10
+    };
+    const response = await productApi.getProductList(params);
+    
+    // Spring Data IPage 返回结构：{ content, totalElements, totalPages, number, size }
+    if (response.data) {
+      productsData.value = response.data.content || [];
+    }
+  } catch (error) {
+    console.error('Search products failed:', error);
+    console.error('错误详情:', error.response?.data);
+    productsData.value = [];
+  } finally {
     productsLoading.value = false;
-  }, 300);
+  }
 }
 
 function handleProductClick(productId) {
@@ -347,20 +304,18 @@ function getTradeMethodText(tradeType) {
 async function handleOrderClick() {
   try {
     console.log('[Home] 开始获取订单信息');
-    const response = await requestWithFallback(
-      () => orderApi.getOrderList(),
-      'orders'
-    );
+    const userId = getCurrentUserId();
+    const response = await orderApi.getOrderList({ userId });
     
     console.log('[Home] 订单响应:', response);
     
-    if (response.code === 200 && response.data) {
+    if (response.data.code === 200 && response.data.data) {
       // 根据后端标准，数据结构是 { total, list }
       let orders = [];
-      if (Array.isArray(response.data.list)) {
-        orders = response.data.list;
-      } else if (Array.isArray(response.data)) {
-        orders = response.data;
+      if (Array.isArray(response.data.data.list)) {
+        orders = response.data.data.list;
+      } else if (Array.isArray(response.data.data)) {
+        orders = response.data.data;
       }
       
       console.log('[Home] 解析的订单列表:', orders);
@@ -383,7 +338,7 @@ async function handleOrderClick() {
 }
 
 function handleAiClick() {
-  alert('AI客服为你服务！\n\n请问有什么可以帮助你的？');
+  router.push('/ai-chat');
 }
 
 function showUserCenter() {

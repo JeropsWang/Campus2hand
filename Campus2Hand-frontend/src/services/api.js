@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 创建axios实例
 const apiClient = axios.create({
-  baseURL: '/api', // API基础路径，会通过Vite代理转发
+  baseURL: '', // 空baseURL，路径直接写完整
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -65,22 +65,22 @@ apiClient.interceptors.response.use(
 export const userApi = {
   // 登录
   login(data) {
-    return apiClient.post('/user/login', data)
+    return apiClient.post('/api/user/login', data)
   },
 
-  // 获取用户信息
+  // 获取用户信息 - 后端使用id查询
   getUserInfo(userId) {
-    return apiClient.get(`/user/${userId}`)
+    return apiClient.get(`/api/user/${userId}`)
   },
 
-  // 修改用户信息
+  // 修改用户信息 - 通过userId标识用户
   updateUserInfo(data) {
-    return apiClient.put('/user/info', data)
+    return apiClient.put('/api/user/info', data)
   },
 
   // 上传头像
   uploadAvatar(userId, formData) {
-    return apiClient.post(`/user/${userId}/avatar`, formData, {
+    return apiClient.post(`/api/user/${userId}/avatar`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -89,35 +89,43 @@ export const userApi = {
 
   // 修改密码
   changePassword(data) {
-    return apiClient.put('/user/password', data)
+    return apiClient.put('/api/user/password', data)
   }
 }
 
 // 商品API
 export const productApi = {
-  // 获取商品列表
+  // 获取商品列表 - 后端路径是 /product/list（单数）
   getProductList(params) {
-    return apiClient.get('/product/list', { params })
+    return apiClient.get('/api/product/list', { params })
   },
 
   // 获取商品详情
   getProductDetail(productId) {
-    return apiClient.get(`/product/${productId}`)
+    return apiClient.get(`/api/product/${productId}`)
   },
 
   // 发布商品
   createProduct(data) {
-    return apiClient.post('/product', data)
+    return apiClient.post('/api/product', data)
   },
 
   // 修改商品
   updateProduct(data) {
-    return apiClient.put('/product', data)
+    return apiClient.put('/api/product', data)
   },
 
   // 下架/删除商品
   deleteProduct(productId) {
-    return apiClient.delete(`/product/${productId}`)
+    return apiClient.delete(`/api/product/${productId}`)
+  }
+}
+
+// AI客服API
+export const aiApi = {
+  // 发送聊天消息
+  chat(data) {
+    return apiClient.post('/api/ai/chat', data)
   }
 }
 
@@ -125,22 +133,22 @@ export const productApi = {
 export const orderApi = {
   // 获取订单列表
   getOrderList(params) {
-    return apiClient.get('/orders/list', { params })
+    return apiClient.get('/api/orders/list', { params })
   },
 
   // 获取订单详情
   getOrderDetail(orderId) {
-    return apiClient.get(`/orders/${orderId}`)
+    return apiClient.get(`/api/orders/${orderId}`)
   },
 
   // 创建订单
   createOrder(data) {
-    return apiClient.post('/orders', data)
+    return apiClient.post('/api/orders', data)
   },
 
   // 取消订单
   cancelOrder(orderId) {
-    return apiClient.put('/orders/cancel', { orderId })
+    return apiClient.put('/api/orders/cancel', { orderId })
   }
 }
 
@@ -148,5 +156,6 @@ export default {
   userApi,
   productApi,
   orderApi,
+  aiApi,
   apiClient
 }

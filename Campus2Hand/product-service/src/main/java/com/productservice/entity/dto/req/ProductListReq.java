@@ -1,5 +1,7 @@
 package com.productservice.entity.dto.req;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
