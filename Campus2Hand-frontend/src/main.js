@@ -15,3 +15,8 @@ app.use(router)
 
 // 挂载到DOM
 app.mount('#app')
+
+// 应用挂载后初始化用户状态
+import { useUserStore } from './stores/user'
+const userStore = useUserStore()
+userStore.initFromStorage()

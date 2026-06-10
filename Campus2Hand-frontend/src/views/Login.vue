@@ -143,9 +143,9 @@ async function handleLogin() {
     const result = await userStore.login(formData.studentId, formData.password)
 
     if (result.success) {
-      // 登录成功，跳转到之前的页面或测试页
-      const redirect = route.query.redirect || '/test'
-      router.push(redirect)
+      // 登录成功，直接跳转到首页
+      console.log('[Login] 登录成功，跳转到首页')
+      window.location.href = '/'
     } else {
       // 登录失败，显示错误信息
       alert(result.message)

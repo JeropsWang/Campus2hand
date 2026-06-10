@@ -21,8 +21,14 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
+        changeOrigin: true
+        // 不配置rewrite，保留/api前缀由后端网关的StripPrefix=1处理
+      },
+      // 头像静态资源代理
+      '/avatars': {
+        target: 'http://localhost:8081', // user-service端口
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/avatars/, '/avatars')
       }
     }
   },

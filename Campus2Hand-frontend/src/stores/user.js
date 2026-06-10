@@ -8,8 +8,8 @@ export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
   const loading = ref(false)
 
-  // 计算属性
-  const isLoggedIn = computed(() => !!token.value && !!userInfo.value)
+  // 计算属性 - 只要有token就认为是登录状态
+  const isLoggedIn = computed(() => !!token.value)
 
   // 获取用户信息
   async function fetchUserInfo() {
@@ -37,17 +37,32 @@ export const useUserStore = defineStore('user', () => {
     loading.value = true
     try {
       const response = await userApi.login({ studentId, password })
+      console.log('[UserStore] 登录响应:', response)
+      
       if (response.data.code === 200) {
-        const { data, token: newToken } = response.data.data
-        userInfo.value = data
+        // 根据后端标准，登录返回: { token, userId, nickname }
+        const loginData = response.data.data
+        const newToken = loginData.token
+        
+        // 构建用户信息对象
+        const userData = {
+          userId: loginData.userId,
+          studentId: loginData.userId, // 后端标准中userId就是学号
+          nickname: loginData.nickname || '',
+          name: loginData.nickname || ''
+        }
+        
+        userInfo.value = userData
         token.value = newToken
         localStorage.setItem('token', newToken)
-        localStorage.setItem('user', JSON.stringify(data))
-        return { success: true, data }
+        localStorage.setItem('user', JSON.stringify(userData))
+        
+        console.log('[UserStore] 登录成功，存储用户信息:', userData)
+        return { success: true, data: userData }
       }
       return { success: false, message: response.data.message || '登录失败' }
     } catch (error) {
-      console.error('登录失败:', error)
+      console.error('[UserStore] 登录失败:', error)
       return {
         success: false,
         message: error.response?.data?.message || '登录失败，请稍后重试'

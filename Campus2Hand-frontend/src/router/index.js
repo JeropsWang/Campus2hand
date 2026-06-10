@@ -3,13 +3,20 @@ import { useUserStore } from '@/stores/user'
 
 // 路由懒加载
 const Login = () => import('@/views/Login.vue')
+const Home = () => import('@/views/Home.vue')
 const Test = () => import('@/views/Test.vue')
 const NotFound = () => import('@/views/NotFound.vue')
+const Profile = () => import('@/views/Profile.vue')
 
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    name: 'Home',
+    component: Home,
+    meta: {
+      title: '首页',
+      requiresAuth: false // 暂时关闭登录验证，确保能访问首页
+    }
   },
   {
     path: '/login',
@@ -26,6 +33,15 @@ const routes = [
     component: Test,
     meta: {
       title: '测试页面',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
+    meta: {
+      title: '个人中心',
       requiresAuth: true
     }
   },
@@ -53,8 +69,15 @@ router.beforeEach((to, from, next) => {
   // 检查是否需要登录
   if (to.meta.requiresAuth) {
     const userStore = useUserStore()
+    console.log('[Router] 检查登录状态:', {
+      isLoggedIn: userStore.isLoggedIn,
+      hasToken: !!userStore.token,
+      hasUserInfo: !!userStore.userInfo
+    })
+    
     if (!userStore.isLoggedIn) {
       // 未登录，跳转到登录页
+      console.log('[Router] 未登录，跳转到登录页')
       next({
         path: '/login',
         query: { redirect: to.fullPath }
@@ -63,17 +86,8 @@ router.beforeEach((to, from, next) => {
       next()
     }
   } else {
-    // 如果已登录且访问登录页，重定向到测试页
-    if (to.path === '/login') {
-      const userStore = useUserStore()
-      if (userStore.isLoggedIn) {
-        next('/test')
-      } else {
-        next()
-      }
-    } else {
-      next()
-    }
+    // 不需要登录的页面直接放行，登录后的跳转由Login.vue处理
+    next()
   }
 })
 

@@ -69,28 +69,27 @@ export const userApi = {
   },
 
   // 获取用户信息
-  getUserInfo() {
-    return apiClient.get('/user/info')
+  getUserInfo(userId) {
+    return apiClient.get(`/user/${userId}`)
   },
 
-  // 获取用户列表
-  getUserList(params) {
-    return apiClient.get('/user/list', { params })
+  // 修改用户信息
+  updateUserInfo(data) {
+    return apiClient.put('/user/info', data)
   },
 
-  // 注册
-  register(data) {
-    return apiClient.post('/user/register', data)
+  // 上传头像
+  uploadAvatar(userId, formData) {
+    return apiClient.post(`/user/${userId}/avatar`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   },
 
-  // 更新用户信息
-  updateUser(data) {
-    return apiClient.put('/user/update', data)
-  },
-
-  // 删除用户
-  deleteUser(id) {
-    return apiClient.delete(`/user/delete/${id}`)
+  // 修改密码
+  changePassword(data) {
+    return apiClient.put('/user/password', data)
   }
 }
 
@@ -102,23 +101,23 @@ export const productApi = {
   },
 
   // 获取商品详情
-  getProductDetail(id) {
-    return apiClient.get(`/product/detail/${id}`)
+  getProductDetail(productId) {
+    return apiClient.get(`/product/${productId}`)
   },
 
   // 发布商品
   createProduct(data) {
-    return apiClient.post('/product/create', data)
+    return apiClient.post('/product', data)
   },
 
-  // 更新商品
-  updateProduct(id, data) {
-    return apiClient.put(`/product/update/${id}`, data)
+  // 修改商品
+  updateProduct(data) {
+    return apiClient.put('/product', data)
   },
 
-  // 删除商品
-  deleteProduct(id) {
-    return apiClient.delete(`/product/delete/${id}`)
+  // 下架/删除商品
+  deleteProduct(productId) {
+    return apiClient.delete(`/product/${productId}`)
   }
 }
 
@@ -126,27 +125,22 @@ export const productApi = {
 export const orderApi = {
   // 获取订单列表
   getOrderList(params) {
-    return apiClient.get('/order/list', { params })
+    return apiClient.get('/orders/list', { params })
   },
 
   // 获取订单详情
-  getOrderDetail(id) {
-    return apiClient.get(`/order/detail/${id}`)
+  getOrderDetail(orderId) {
+    return apiClient.get(`/orders/${orderId}`)
   },
 
   // 创建订单
   createOrder(data) {
-    return apiClient.post('/order/create', data)
+    return apiClient.post('/orders', data)
   },
 
   // 取消订单
-  cancelOrder(id) {
-    return apiClient.put(`/order/cancel/${id}`)
-  },
-
-  // 完成订单
-  completeOrder(id) {
-    return apiClient.put(`/order/complete/${id}`)
+  cancelOrder(orderId) {
+    return apiClient.put('/orders/cancel', { orderId })
   }
 }
 
