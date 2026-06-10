@@ -16,12 +16,12 @@ spring:
             readTimeout: 5000
     sentinel:
       transport:
-        dashboard: localhost:8080
+        dashboard: 192.168.0.3:8848
         port: 8719
       datasource:
         ds1:
           nacos:
-            server-addr: localhost:8848
+            server-addr: 192.168.0.3:8848
             data-id: ${spring.application.name}-sentinel-rules
             group-id: DEFAULT_GROUP
             data-type: json

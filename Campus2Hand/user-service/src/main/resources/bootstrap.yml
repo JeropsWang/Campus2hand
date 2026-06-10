@@ -7,12 +7,12 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
+        server-addr: 192.168.0.3:8848
         username: nacos
         password: nacos
       config:
         on-profiles: dev
-        server-addr: localhost:8848
+        server-addr: 192.168.0.3:8848
         file-extension: yml
         username: nacos
         password: nacos

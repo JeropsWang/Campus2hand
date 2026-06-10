@@ -1,12 +1,20 @@
 spring:
+  config:
+    import: optional:nacos:bootstrap.yml
+  # 下面是你原来的配置，不动
   application:
-    name: product-service  # 服务名，必须写
-  #  profiles:             # 环境，规则就是{文件名}-{环境}.格式
-  #    active: dev
+    name: product-service
 
   cloud:
     nacos:
+      # 服务注册发现
       discovery:
-        server-addr: 10.125.137.99:8848  # Nacos 地址
-        enable: true
-        file-extension: yaml         # 配置文件的格式
+        server-addr: 192.168.0.3:8848
+        enabled: true
+
+      # 配置中心
+      config:
+        server-addr: 192.168.0.3:8848
+        file-extension: yaml
+        enabled: true
+        refresh-enabled: true
