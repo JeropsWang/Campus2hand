@@ -48,16 +48,22 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public IPage<ProductResp> listProducts(ProductListReq req) {
+
         Page<Product> page = new Page<>(req.getPageNum(), req.getPageSize());
+
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+
         if (req.getCategory() != null && !req.getCategory().isEmpty()) {
             queryWrapper.eq(Product::getCategory, req.getCategory());
         }
+
         if (req.getTitle() != null && !req.getTitle().isEmpty()) {
             queryWrapper.like(Product::getTitle, req.getTitle());
         }
+
         queryWrapper.eq(Product::getStatus, "ACTIVE");
         queryWrapper.orderByDesc(Product::getPublishTime);
+
         IPage<Product> productPage = page(page, queryWrapper);
         return productPage.convert(this::convertToResp);
     }
