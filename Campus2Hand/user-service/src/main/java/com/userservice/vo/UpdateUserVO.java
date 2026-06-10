@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class UpdateUserVO {
-    private Long Id;
+
+    private Long id;
     private String nickname;
     private String phone;
     private String avatar;
