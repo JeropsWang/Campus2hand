@@ -3,10 +3,12 @@ package com.productservice.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.productservice.entity.dto.req.ProductCreateReq;
-import com.productservice.entity.dto.req.ProductListReq;
-import com.productservice.entity.dto.resp.ProductResp;
+import com.productservice.entity.dto.ProductCreateDTO;
+import com.productservice.entity.dto.ProductListDTO;
+import com.productservice.entity.vo.ProductVO;
 import com.productservice.entity.po.Product;
+import com.productservice.entity.vo.UploadResponseVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -18,10 +20,11 @@ import com.productservice.entity.po.Product;
  */
 public interface IProductService extends IService<Product> {
 
-    ProductResp createProduct(ProductCreateReq req);
+    ProductVO createProduct(ProductCreateDTO req);
 
-    ProductResp getProductById(Integer productId);
+    ProductVO getProductById(Integer productId);
 
-    IPage<ProductResp> listProducts(ProductListReq req);
+    IPage<ProductVO> listProducts(ProductListDTO req);
 
+    UploadResponseVO uploadAvatar(Long productId, MultipartFile file);
 }

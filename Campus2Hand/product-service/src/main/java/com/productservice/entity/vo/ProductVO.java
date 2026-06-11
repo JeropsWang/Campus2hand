@@ -1,4 +1,4 @@
-package com.productservice.entity.dto.resp;
+package com.productservice.entity.vo;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-public class ProductResp {
+public class ProductVO {
     private Integer id;
     private String category;
     private String title;

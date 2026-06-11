@@ -1,11 +1,10 @@
-package com.productservice.entity.dto.req;
+package com.productservice.entity.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class ProductListReq {
+public class ProductListDTO {
     private String category;
     private String title;
     private Integer pageNum = 1;

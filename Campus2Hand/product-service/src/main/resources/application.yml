@@ -1,28 +1,34 @@
-server:
-  port: 8082
+#server:
+#  port: 8082
+#
+#spring:
+#  application:
+#    name: product-service
+#
+#  # 数据库配置（本地兜底配置，会被Nacos配置覆盖）
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/product_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+#    username: root
+#    password: 724636604
+#  cloud:
+#    openfeign:
+#      # ???????????
+#      circuitbreaker:
+#        enabled: true
+#      # Feign ???????
+#      client:
+#        config:
+#          default:
+#            loggerLevel: full
+#            connectTimeout: 5000
+#            readTimeout: 5000
 
-spring:
-  application:
-    name: product-service
+# 头像上传配置
+avatar:
+  upload:
+    path: ./uploads/products
 
-  # 数据库配置（本地兜底配置，会被Nacos配置覆盖）
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/product_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
-    username: root
-    password: 724636604
-  cloud:
-    openfeign:
-      # ???????????
-      circuitbreaker:
-        enabled: true
-      # Feign ???????
-      client:
-        config:
-          default:
-            loggerLevel: full
-            connectTimeout: 5000
-            readTimeout: 5000
 
 # MyBatis
 mybatis:
