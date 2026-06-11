@@ -95,29 +95,29 @@ export const userApi = {
 
 // 商品API
 export const productApi = {
-  // 获取商品列表 - 后端路径是 /product/list（单数）
+  // 获取商品列表 - 后端路径是 /products/list（复数）
   getProductList(params) {
-    return apiClient.get('/api/product/list', { params })
+    return apiClient.get('/api/products/list', { params })
   },
 
   // 获取商品详情
   getProductDetail(productId) {
-    return apiClient.get(`/api/product/${productId}`)
+    return apiClient.get(`/api/products/${productId}`)
   },
 
   // 发布商品
   createProduct(data) {
-    return apiClient.post('/api/product', data)
+    return apiClient.post('/api/products', data)
   },
 
   // 修改商品
   updateProduct(data) {
-    return apiClient.put('/api/product', data)
+    return apiClient.put('/api/products', data)
   },
 
   // 下架/删除商品
   deleteProduct(productId) {
-    return apiClient.delete(`/api/product/${productId}`)
+    return apiClient.delete(`/api/products/${productId}`)
   }
 }
 

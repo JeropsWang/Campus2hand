@@ -239,10 +239,12 @@ async function loadProducts() {
     };
     const response = await productApi.getProductList(params);
     
-    // Spring Data IPage 返回结构：{ content, totalElements, totalPages, number, size }
+    // MyBatis Plus 分页返回结构：{ records, total, size, current, pages }
+    console.log('[Home] 商品列表响应:', JSON.stringify(response.data, null, 2));
     if (response.data) {
-      // IPage 的数据列表字段是 content，不是 list
-      productsData.value = response.data.content || [];
+      // MyBatis Plus 的数据列表字段是 records
+      productsData.value = response.data.records || [];
+      console.log('[Home] 解析到商品数量:', productsData.value.length);
     }
   } catch (error) {
     console.error('Load products failed:', error);
@@ -265,9 +267,9 @@ async function searchProducts() {
     };
     const response = await productApi.getProductList(params);
     
-    // Spring Data IPage 返回结构：{ content, totalElements, totalPages, number, size }
+    // MyBatis Plus 分页返回结构：{ records, total, size, current, pages }
     if (response.data) {
-      productsData.value = response.data.content || [];
+      productsData.value = response.data.records || [];
     }
   } catch (error) {
     console.error('Search products failed:', error);
