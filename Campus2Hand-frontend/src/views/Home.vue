@@ -45,7 +45,15 @@
             @click="handleProductClick(product.id)"
             class="product-card"
           >
-            <div class="product-image">图</div>
+            <div class="product-image">
+  <img 
+    v-if="product.image_url" 
+    :src="product.image_url" 
+    alt="商品图片"
+    @error="handleProductImageError($event)"
+  />
+  <div v-else class="product-image-placeholder">图</div>
+</div>
             <div class="product-title">{{ product.title }}</div>
             <div class="product-price">¥{{ product.price.toFixed(2) }}</div>
             <div class="product-condition">{{ product.quality }}</div>
@@ -231,6 +239,16 @@ function handleAvatarError(event) {
   event.target.parentElement.querySelector('.user-avatar-text')?.classList.remove('hidden');
 }
 
+// 商品图片加载失败处理
+function handleProductImageError(event) {
+  console.warn('[Home] 商品图片加载失败，显示占位符');
+  event.target.style.display = 'none';
+  const placeholder = event.target.parentElement.querySelector('.product-image-placeholder');
+  if (placeholder) {
+    placeholder.style.display = 'flex';
+  }
+}
+
 async function loadProducts() {
   productsLoading.value = true;
   try {
@@ -243,12 +261,18 @@ async function loadProducts() {
     };
     const response = await productApi.getProductList(params);
     
-    // MyBatis Plus 分页返回结构：{ records, total, size, current, pages }
-    console.log('[Home] 商品列表响应:', JSON.stringify(response.data, null, 2));
-    if (response.data) {
+    console.log('[Home] 商品列表响应完整:', JSON.stringify(response.data, null, 2));
+    
+    // 后端统一 Result 包装：response.data = { code, message, data: { records, total, ... } }
+    const resultData = response.data?.data || response.data;
+    
+    console.log('[Home] 解析后的数据:', JSON.stringify(resultData, null, 2));
+    
+    if (resultData) {
       // MyBatis Plus 的数据列表字段是 records
-      productsData.value = response.data.records || [];
+      productsData.value = resultData.records || resultData || [];
       console.log('[Home] 解析到商品数量:', productsData.value.length);
+      console.log('[Home] 第一个商品图片字段:', productsData.value[0]?.image_url);
     }
   } catch (error) {
     console.error('Load products failed:', error);
@@ -589,8 +613,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-image-placeholder {
   color: #666666;
   font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-title {

@@ -245,29 +245,43 @@ async function submitProduct() {
 
   isSubmitting.value = true;
   try {
-    // 根据后端 ProductCreateDTO 的字段结构
-    const data = {
+    // 步骤1：先创建商品（JSON格式，不含图片）
+    const productData = {
       title: form.value.title,
       category: form.value.category,
       price: form.value.price,
       quality: form.value.quality,
       description: form.value.description || '',
-      imageUrl: '' // 暂时为空，后续可通过上传接口补充
+      imageUrl: ''
     };
 
-    console.log('[Publish] 提交商品数据:', JSON.stringify(data, null, 2));
+    console.log('[Publish] 步骤1: 创建商品 - 数据:', JSON.stringify(productData, null, 2));
 
-    const response = await productApi.createProduct(data);
+    const createResponse = await productApi.createProduct(productData);
+    const productId = createResponse.data?.id;
 
-    console.log('[Publish] 后端响应:', JSON.stringify(response.data, null, 2));
+    console.log('[Publish] 步骤1: 商品创建成功, ID:', productId);
 
-    if (response.data) {
-      alert('商品发布成功！');
-      router.push('/');
+    if (!productId) {
+      throw new Error('商品创建失败，未返回商品ID');
     }
+
+    // 步骤2：如果有图片，上传图片
+    if (uploadedFiles.value.length > 0) {
+      console.log('[Publish] 步骤2: 开始上传图片, 数量:', uploadedFiles.value.length);
+      
+      const formData = new FormData();
+      formData.append('file', uploadedFiles.value[0]); // 只上传第一张作为封面
+      
+      const uploadResponse = await productApi.uploadAvatar(productId, formData);
+      console.log('[Publish] 步骤2: 图片上传成功:', JSON.stringify(uploadResponse.data, null, 2));
+    }
+
+    alert('商品发布成功！');
+    router.push('/');
   } catch (error) {
     console.error('发布商品失败:', error);
-    console.error('错误详情:', error.response?.data);
+    console.error('错误详情:', error.response?.data || error.message);
     alert('发布失败，请稍后重试');
   } finally {
     isSubmitting.value = false;

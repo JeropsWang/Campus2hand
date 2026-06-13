@@ -17,6 +17,12 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // 如果是 FormData，不设置 Content-Type，让浏览器自动处理
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
+    
     return config
   },
   (error) => {
@@ -118,6 +124,11 @@ export const productApi = {
   // 下架/删除商品
   deleteProduct(productId) {
     return apiClient.delete(`/api/products/${productId}`)
+  },
+
+  // 上传商品头像
+  uploadAvatar(productId, formData) {
+    return apiClient.post(`/api/products/${productId}/avatar`, formData)
   }
 }
 

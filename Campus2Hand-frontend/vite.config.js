@@ -29,6 +29,11 @@ export default defineConfig({
         target: 'http://localhost:8081', // user-service端口
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/avatars/, '/avatars')
+      },
+      // 商品图片静态资源代理 - 直接请求后端端口
+      '/products': {
+        target: 'http://localhost:8082',
+        changeOrigin: true
       }
     }
   },
