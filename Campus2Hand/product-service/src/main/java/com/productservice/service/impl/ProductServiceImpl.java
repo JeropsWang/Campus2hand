@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements IProductService {
 
-    @Value("${avatar.upload.path:./uploads/avatars}")
+    @Value("${products.upload.path:./uploads/products}")
     private String uploadPath;
 
 
@@ -116,7 +116,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             Files.copy(file.getInputStream(), filePath);
 
             // 构建访问URL（使用相对路径，前端通过代理访问）
-            String avatarUrl = "/avatars/" + newFilename;
+            String avatarUrl = "/products/" + newFilename;
 
             // 更新用户头像（存储相对路径）
             product.setImageUrl(avatarUrl);

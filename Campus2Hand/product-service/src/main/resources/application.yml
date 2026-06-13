@@ -25,7 +25,7 @@
 #            readTimeout: 5000
 
 # 头像上传配置
-avatar:
+products:
   upload:
     path: ./uploads/products
 
