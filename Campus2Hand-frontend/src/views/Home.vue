@@ -47,8 +47,8 @@
           >
             <div class="product-image">
   <img 
-    v-if="product.image_url" 
-    :src="product.image_url" 
+    v-if="product.imageUrl" 
+    :src="product.imageUrl" 
     alt="商品图片"
     @error="handleProductImageError($event)"
   />
@@ -272,7 +272,7 @@ async function loadProducts() {
       // MyBatis Plus 的数据列表字段是 records
       productsData.value = resultData.records || resultData || [];
       console.log('[Home] 解析到商品数量:', productsData.value.length);
-      console.log('[Home] 第一个商品图片字段:', productsData.value[0]?.image_url);
+      console.log('[Home] 第一个商品图片字段:', productsData.value[0]?.imageUrl);
     }
   } catch (error) {
     console.error('Load products failed:', error);
@@ -376,6 +376,8 @@ function handlePublishClick() {
 }
 
 function showUserCenter() {
+  // 输出头像地址到控制台
+  console.log('[Home] 个人中心头像地址:', userData.value?.avatar);
   // 跳转到个人中心页面
   router.push('/profile');
 }

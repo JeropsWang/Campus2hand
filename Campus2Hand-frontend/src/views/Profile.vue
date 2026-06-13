@@ -238,6 +238,9 @@ async function loadUserInfo() {
         college: rawData.college || rawData.department || rawData.school || ''
       };
       console.log('[Profile] 字段映射结果:', JSON.stringify(userData.value, null, 2));
+      const fullAvatarUrl = userData.value.avatar ? `${window.location.origin}${userData.value.avatar}` : '';
+      console.log('[Profile] 头像地址:', userData.value.avatar);
+      console.log('[Profile] 完整头像地址:', fullAvatarUrl);
       // 同步到localStorage和userStore
       localStorage.setItem('user', JSON.stringify(userData.value));
       if (userStore.userInfo) {

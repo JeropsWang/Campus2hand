@@ -31,9 +31,11 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/avatars/, '/avatars')
       },
       // 商品图片静态资源代理 - 直接请求后端端口
-      '/products': {
+      // 注意：使用 /product-images 避免与 /products API 路由冲突
+      '/product-images': {
         target: 'http://localhost:8082',
-        changeOrigin: true
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/product-images/, '/product-images')
       }
     }
   },

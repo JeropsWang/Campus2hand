@@ -116,7 +116,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             Files.copy(file.getInputStream(), filePath);
 
             // 构建访问URL（使用相对路径，前端通过代理访问）
-            String avatarUrl = "/products/" + newFilename;
+            // 注意：使用 /product-images 避免与 /products API 路由冲突
+            String avatarUrl = "/product-images/" + newFilename;
 
             // 更新用户头像（存储相对路径）
             product.setImageUrl(avatarUrl);
