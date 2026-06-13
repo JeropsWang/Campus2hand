@@ -9,6 +9,7 @@ const NotFound = () => import('@/views/NotFound.vue')
 const Profile = () => import('@/views/Profile.vue')
 const Orders = () => import('@/views/Orders.vue')
 const AiChat = () => import('@/views/AiChat.vue')
+const PublishProduct = () => import('@/views/PublishProduct.vue')
 
 const routes = [
   {
@@ -63,6 +64,15 @@ const routes = [
     meta: {
       title: 'AI客服',
       requiresAuth: false
+    }
+  },
+  {
+    path: '/publish',
+    name: 'PublishProduct',
+    component: PublishProduct,
+    meta: {
+      title: '发布商品',
+      requiresAuth: true
     }
   },
   {

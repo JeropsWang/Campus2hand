@@ -67,6 +67,10 @@
         <div class="btn-icon ai-icon">AI</div>
         <span>AI客服</span>
       </div>
+      <div @click="handlePublishClick" class="side-btn publish-btn">
+        <div class="btn-icon publish-icon">+</div>
+        <span>发布商品</span>
+      </div>
     </aside>
 
     <!-- 底部 -->
@@ -341,6 +345,10 @@ async function handleOrderClick() {
 
 function handleAiClick() {
   router.push('/ai-chat');
+}
+
+function handlePublishClick() {
+  router.push('/publish');
 }
 
 function showUserCenter() {
@@ -653,6 +661,13 @@ onMounted(() => {
   background-color: #333333;
   color: #FFFFFF;
   font-size: 16px;
+  font-weight: 600;
+}
+
+.publish-icon {
+  background-color: #1a1a1a;
+  color: #FFFFFF;
+  font-size: 24px;
   font-weight: 600;
 }
 
