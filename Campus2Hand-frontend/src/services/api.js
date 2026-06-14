@@ -152,14 +152,29 @@ export const orderApi = {
     return apiClient.get(`/api/orders/${orderId}`)
   },
 
-  // 创建订单
-  createOrder(data) {
-    return apiClient.post('/api/orders', data)
+  // 创建订单 - 后端需要 userId 作为 URL 参数
+  createOrder(data, userId) {
+    return apiClient.post(`/api/orders?userId=${userId}`, data)
   },
 
-  // 取消订单
-  cancelOrder(orderId) {
-    return apiClient.put('/api/orders/cancel', { orderId })
+  // 取消订单 - 后端需要 userId 作为 URL 参数
+  cancelOrder(orderId, userId, cancelReason = '') {
+    return apiClient.post(`/api/orders/cancel?userId=${userId}`, { 
+      orderId, 
+      cancelReason 
+    })
+  },
+
+  // 更新订单状态
+  updateOrderStatus(orderId, status, tradeLocation = '') {
+    return apiClient.put(`/api/orders/status?orderId=${orderId}&status=${status}&tradeLocation=${tradeLocation}`)
+  },
+
+  // 我的订单
+  getMyOrders(userId, status = '', pageNum = 1, pageSize = 10) {
+    const params = { userId, pageNum, pageSize }
+    if (status) params.status = status
+    return apiClient.get('/api/orders/my', { params })
   }
 }
 

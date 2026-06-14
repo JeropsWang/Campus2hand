@@ -57,7 +57,14 @@
             <div class="order-body">
               <div class="product-info">
                 <div class="product-image">
-                  <span class="image-placeholder">商</span>
+                  <img 
+                    v-if="order.product?.imageUrl" 
+                    :src="order.product.imageUrl" 
+                    class="product-img"
+                    :alt="order.productName"
+                    @error="handleProductImageError($event)"
+                  />
+                  <span v-else class="image-placeholder">商</span>
                 </div>
                 <div class="product-details">
                   <h3 class="product-name">{{ order.productName || '未知商品' }}</h3>
@@ -138,25 +145,35 @@
 
           <div class="detail-section">
             <h4>商品信息</h4>
-            <div class="detail-item">
-              <span class="detail-label">商品名称</span>
-              <span class="detail-value">{{ selectedOrder.productName || '未设置' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">商品ID</span>
-              <span class="detail-value">{{ selectedOrder.productId || selectedOrder.product_id || '未设置' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">单价</span>
-              <span class="detail-value">¥{{ formatPrice(selectedOrder.price) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">数量</span>
-              <span class="detail-value">{{ selectedOrder.quantity || 1 }}</span>
-            </div>
-            <div class="detail-item total-row">
-              <span class="detail-label">订单总额</span>
-              <span class="detail-value total">¥{{ formatPrice(selectedOrder.totalAmount) }}</span>
+            <div class="detail-product-info">
+              <div class="detail-product-image">
+                <img 
+                  v-if="selectedOrder.product?.imageUrl" 
+                  :src="selectedOrder.product.imageUrl" 
+                  class="detail-product-img"
+                  :alt="selectedOrder.productName"
+                  @error="handleDetailImageError"
+                />
+                <span v-else class="detail-image-placeholder">商</span>
+              </div>
+              <div class="detail-product-text">
+                <div class="detail-item">
+                  <span class="detail-label">商品名称</span>
+                  <span class="detail-value">{{ selectedOrder.productName || '未设置' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">单价</span>
+                  <span class="detail-value">¥{{ formatPrice(selectedOrder.price) }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">数量</span>
+                  <span class="detail-value">{{ selectedOrder.quantity || 1 }}</span>
+                </div>
+                <div class="detail-item total-row">
+                  <span class="detail-label">订单总额</span>
+                  <span class="detail-value total">¥{{ formatPrice(selectedOrder.totalAmount) }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -186,6 +203,67 @@
         </div>
       </div>
     </div>
+
+    <!-- 支付弹窗 -->
+    <div v-if="showPaymentModal" class="modal-overlay" @click.self="closePaymentModal">
+      <div class="modal-content payment-modal" @click.stop>
+        <div class="modal-header">
+          <span class="modal-title">模拟支付</span>
+          <span class="modal-close" @click="closePaymentModal">×</span>
+        </div>
+        <div v-if="payingOrder" class="modal-body">
+          <!-- 支付金额展示 -->
+          <div class="payment-amount-section">
+            <div class="payment-label">支付金额</div>
+            <div class="payment-amount">
+              <span class="amount-symbol">¥</span>
+              <span class="amount-value">{{ payingOrder.totalAmount?.toFixed(2) || '0.00' }}</span>
+            </div>
+          </div>
+
+          <!-- 商品信息 -->
+          <div class="payment-product-info">
+            <div class="payment-product-image">
+              <img 
+                v-if="payingOrder.product?.imageUrl" 
+                :src="payingOrder.product.imageUrl" 
+                class="payment-product-img"
+                :alt="payingOrder.productName"
+              />
+              <span v-else class="payment-image-placeholder">商</span>
+            </div>
+            <div class="payment-product-text">
+              <div class="payment-product-name">{{ payingOrder.productName }}</div>
+              <div class="payment-product-quantity">数量: {{ payingOrder.quantity || 1 }}</div>
+            </div>
+          </div>
+
+          <!-- 交易地点输入 -->
+          <div class="payment-input-section">
+            <label class="payment-input-label">交易地点（可选）</label>
+            <input 
+              v-model="tradeLocation" 
+              class="payment-input" 
+              placeholder="请输入交易地点，如：图书馆门口"
+              type="text"
+            />
+          </div>
+
+          <!-- 支付提示 -->
+          <div class="payment-tip">
+            <span class="tip-icon">💡</span>
+            <span class="tip-text">这是模拟支付，点击确认后将更新订单状态</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" @click="closePaymentModal">取消</button>
+          <button class="btn-pay" :disabled="isPaying" @click="confirmPayment">
+            <span v-if="isPaying" class="pay-loading"></span>
+            <span v-else>确认支付</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -202,6 +280,12 @@ const loading = ref(true);
 const currentStatus = ref('');
 const showDetailModal = ref(false);
 const selectedOrder = ref(null);
+
+// 支付弹窗状态
+const showPaymentModal = ref(false);
+const payingOrder = ref(null);
+const isPaying = ref(false);
+const tradeLocation = ref('');
 
 // 订单统计
 const stats = ref({
@@ -235,6 +319,20 @@ function getCurrentUserId() {
   return '1';
 }
 
+// 商品图片加载失败处理
+function handleProductImageError(event) {
+  event.target.style.display = 'none';
+  const placeholder = event.target.parentElement.querySelector('.image-placeholder');
+  if (placeholder) placeholder.style.display = 'flex';
+}
+
+// 详情页商品图片加载失败处理
+function handleDetailImageError(event) {
+  event.target.style.display = 'none';
+  const placeholder = event.target.parentElement.querySelector('.detail-image-placeholder');
+  if (placeholder) placeholder.style.display = 'flex';
+}
+
 // 加载订单数据
 async function loadOrders() {
   console.log('=====================================');
@@ -243,11 +341,11 @@ async function loadOrders() {
   try {
     const userId = getCurrentUserId();
     console.log('[Orders] 请求参数 - userId:', userId);
-    console.log('[Orders] 请求URL:', '/api/orders/list?userId=' + userId);
+    console.log('[Orders] 请求URL:', '/api/orders/my?userId=' + userId);
     console.log('-------------------------------------');
     
-    // 后端订单接口使用用户ID查询
-    const response = await orderApi.getOrderList({ userId });
+    // 使用后端专门的"我的订单"接口
+    const response = await orderApi.getMyOrders(userId, currentStatus.value);
     
     console.log('[Orders] 响应状态:', response.status);
     console.log('[Orders] 响应数据:', JSON.stringify(response.data, null, 2));
@@ -255,7 +353,6 @@ async function loadOrders() {
     
     if (response.data.code === 200 && response.data.data) {
       const data = response.data.data;
-      // 兼容分页格式和列表格式
       // 后端返回的是分页数据：data.records 包含订单列表
       orders.value = data.records || data.list || (Array.isArray(data) ? data : []);
       console.log('[Orders] ✅ 成功获取订单数据');
@@ -371,14 +468,88 @@ function closeDetailModal() {
   selectedOrder.value = null;
 }
 
-// 处理支付
+// 处理支付 - 打开支付弹窗
 function handlePayment(order) {
-  alert(`正在支付订单 ${order.orderNo}，金额 ¥${order.totalAmount.toFixed(2)}`);
+  payingOrder.value = order;
+  tradeLocation.value = order.tradeLocation || '';
+  showPaymentModal.value = true;
+}
+
+// 关闭支付弹窗
+function closePaymentModal() {
+  showPaymentModal.value = false;
+  payingOrder.value = null;
+  tradeLocation.value = '';
+  isPaying.value = false;
+}
+
+// 确认支付 - 调用后端接口更新订单状态
+async function confirmPayment() {
+  if (isPaying.value || !payingOrder.value) return;
+  
+  isPaying.value = true;
+  
+  try {
+    console.log('[Orders] 开始支付订单:', payingOrder.value.orderNo);
+    console.log('[Orders] 订单ID:', payingOrder.value.id);
+    console.log('[Orders] 交易地点:', tradeLocation.value);
+    
+    // 调用后端接口更新订单状态为已支付（PENDING_DELIVERY）
+    // PUT /api/orders/status?orderId={orderId}&status={status}&tradeLocation={tradeLocation}
+    const response = await orderApi.updateOrderStatus(
+      payingOrder.value.id,
+      'PENDING_DELIVERY',
+      tradeLocation.value
+    );
+    
+    console.log('[Orders] 支付响应:', response.data);
+    
+    if (response.data && (response.data.code === 200 || response.status === 200)) {
+      console.log('[Orders] ✅ 支付成功');
+      
+      // 关闭支付弹窗
+      closePaymentModal();
+      
+      // 显示支付成功提示
+      alert(`支付成功！订单 ${payingOrder.value?.orderNo || ''} 已更新为待交付状态`);
+      
+      // 刷新订单列表
+      await loadOrders();
+    } else {
+      throw new Error(response.data?.message || '支付失败');
+    }
+  } catch (error) {
+    console.error('[Orders] ❌ 支付失败:', error);
+    alert('支付失败，请稍后重试');
+  } finally {
+    isPaying.value = false;
+  }
 }
 
 // 处理确认收货
-function handleConfirm(order) {
-  alert(`已确认收货，订单 ${order.orderNo}`);
+async function handleConfirm(order) {
+  try {
+    console.log('[Orders] 确认收货，订单ID:', order.id);
+    
+    // 调用后端接口更新订单状态为已完成（COMPLETED）
+    const response = await orderApi.updateOrderStatus(
+      order.id,
+      'COMPLETED',
+      order.tradeLocation || ''
+    );
+    
+    console.log('[Orders] 确认收货响应:', response.data);
+    
+    if (response.data && (response.data.code === 200 || response.status === 200)) {
+      alert(`已确认收货，订单 ${order.orderNo} 已完成`);
+      await loadOrders();
+    } else {
+      throw new Error(response.data?.message || '确认收货失败');
+    }
+  } catch (error) {
+    console.error('[Orders] ❌ 确认收货失败:', error);
+    alert('确认收货失败，请稍后重试');
+  }
 }
 
 // 返回
@@ -605,6 +776,13 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .image-placeholder {
@@ -812,6 +990,45 @@ onMounted(() => {
   border-bottom: 2px solid #f5f5f5;
 }
 
+.detail-product-info {
+  display: flex;
+  gap: 16px;
+}
+
+.detail-product-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.detail-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-image-placeholder {
+  font-size: 32px;
+  color: #999;
+}
+
+.detail-product-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.detail-product-text .detail-item {
+  padding: 6px 0;
+}
+
 .detail-item {
   display: flex;
   justify-content: space-between;
@@ -868,7 +1085,9 @@ onMounted(() => {
 .modal-footer {
   padding: 16px 24px;
   border-top: 1px solid #f0f0f0;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .btn-confirm {
@@ -884,6 +1103,187 @@ onMounted(() => {
 
 .btn-confirm:hover {
   background-color: #444;
+}
+
+/* 支付弹窗样式 */
+.payment-modal {
+  max-width: 420px;
+}
+
+.payment-amount-section {
+  text-align: center;
+  padding: 24px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.payment-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.payment-amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.amount-symbol {
+  font-size: 20px;
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.amount-value {
+  font-size: 36px;
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.payment-product-info {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.payment-product-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.payment-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.payment-image-placeholder {
+  font-size: 28px;
+  color: #999;
+}
+
+.payment-product-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.payment-product-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.payment-product-quantity {
+  font-size: 13px;
+  color: #666;
+}
+
+.payment-input-section {
+  margin-bottom: 16px;
+}
+
+.payment-input-label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.payment-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.payment-input:focus {
+  border-color: #333;
+}
+
+.payment-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fff8e1;
+  border-radius: 8px;
+}
+
+.tip-icon {
+  font-size: 16px;
+}
+
+.tip-text {
+  font-size: 13px;
+  color: #f57c00;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  font-size: 14px;
+  color: #666;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-pay {
+  padding: 10px 32px;
+  font-size: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-pay:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-pay:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pay-loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 600px) {
