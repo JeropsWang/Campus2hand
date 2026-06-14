@@ -38,6 +38,15 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     private String uploadPath;
 
 
+    // 注入基础域名+端口
+    @Value("${image.base-url}")
+    private String imgBase;
+
+    // 注入路径前缀
+    @Value("${image.prefix-path}")
+    private String imgPrefix;
+
+
     @Override
     public ProductVO createProduct(ProductCreateDTO req) {
         Product product = new Product();
@@ -116,20 +125,15 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             Files.copy(file.getInputStream(), filePath);
 
             // 构建访问URL（使用相对路径，前端通过代理访问）
-            // 基础地址（建议放到配置文件）
-            String imgBase = "http://192.168.0.4:8082";
-            // 从数据库查询出的相对路径
-            String relativePath = "/uploads/products/8.jpg";
-            // 拼接
-            String fullImgUrl = imgBase + relativePath;
+            String fullImageUrl = getFullImageUrl(newFilename);
 
             // 更新用户头像（存储相对路径）
-            product.setImageUrl(fullImgUrl);
+            product.setImageUrl(fullImageUrl);
             updateById(product);
 
             // 返回结果
             UploadResponseVO responseVO = new UploadResponseVO();
-            responseVO.setUrl(fullImgUrl);
+            responseVO.setUrl(fullImageUrl);
             responseVO.setFilename(newFilename);
 
             return responseVO;
@@ -178,5 +182,14 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         ProductVO resp = new ProductVO();
         BeanUtils.copyProperties(product, resp);
         return resp;
+    }
+
+    /**
+     * 拼接完整图片URL
+     * @param fileName 文件名 例如：8.jpg
+     * @return 完整访问地址
+     */
+    public String getFullImageUrl(String fileName) {
+        return imgBase + imgPrefix + fileName;
     }
 }

@@ -29,6 +29,11 @@ products:
   upload:
     path: ./uploads/products
 
+# 图片服务基础地址
+image:
+  base-url: http://192.168.0.4:8082
+  prefix-path: /uploads/products/
+
 
 # MyBatis
 mybatis:
