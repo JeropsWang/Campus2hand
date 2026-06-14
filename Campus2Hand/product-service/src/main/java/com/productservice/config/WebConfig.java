@@ -14,9 +14,9 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 映射 /product-images/** 到本地上传目录（避免与 /products API 路由冲突）
-        registry.addResourceHandler("/product-images/**")
-                .addResourceLocations("file:./uploads/products/");
+        // 访问路径：/uploads/products/8.jpg
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:D:/Idea/4685/uploads/");
     }
 
     /**

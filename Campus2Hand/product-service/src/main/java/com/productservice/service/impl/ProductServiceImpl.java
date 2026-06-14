@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author 吴绍祯
@@ -116,16 +116,20 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             Files.copy(file.getInputStream(), filePath);
 
             // 构建访问URL（使用相对路径，前端通过代理访问）
-            // 注意：使用 /product-images 避免与 /products API 路由冲突
-            String avatarUrl = "/product-images/" + newFilename;
+            // 基础地址（建议放到配置文件）
+            String imgBase = "http://192.168.0.4:8082";
+            // 从数据库查询出的相对路径
+            String relativePath = "/uploads/products/8.jpg";
+            // 拼接
+            String fullImgUrl = imgBase + relativePath;
 
             // 更新用户头像（存储相对路径）
-            product.setImageUrl(avatarUrl);
+            product.setImageUrl(fullImgUrl);
             updateById(product);
 
             // 返回结果
             UploadResponseVO responseVO = new UploadResponseVO();
-            responseVO.setUrl(avatarUrl);
+            responseVO.setUrl(fullImgUrl);
             responseVO.setFilename(newFilename);
 
             return responseVO;
@@ -138,8 +142,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     /**
      * 删除旧头像文件
+     *
      * @param oldAvatarUrl 旧头像URL（可能是完整URL或相对路径）
-     * @param uploadDir 上传目录路径
+     * @param uploadDir    上传目录路径
      */
     private void deleteOldAvatar(String oldAvatarUrl, Path uploadDir) {
         if (oldAvatarUrl == null || oldAvatarUrl.isEmpty()) {
