@@ -309,7 +309,8 @@ async function searchProducts() {
 }
 
 function handleProductClick(productId) {
-  alert(`商品ID: ${productId}\n\n模拟跳转到商品详情页`);
+  // 跳转到商品详情页
+  router.push(`/product/${productId}`);
 }
 
 // 状态转换函数

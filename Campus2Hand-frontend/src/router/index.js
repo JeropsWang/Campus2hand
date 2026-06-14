@@ -10,6 +10,7 @@ const Profile = () => import('@/views/Profile.vue')
 const Orders = () => import('@/views/Orders.vue')
 const AiChat = () => import('@/views/AiChat.vue')
 const PublishProduct = () => import('@/views/PublishProduct.vue')
+const ProductDetail = () => import('@/views/ProductDetail.vue')
 
 const routes = [
   {
@@ -73,6 +74,15 @@ const routes = [
     meta: {
       title: '发布商品',
       requiresAuth: true
+    }
+  },
+  {
+    path: '/product/:productId',
+    name: 'ProductDetail',
+    component: ProductDetail,
+    meta: {
+      title: '商品详情',
+      requiresAuth: false
     }
   },
   {
